@@ -3,10 +3,11 @@
 /**
  * Module dependencies.
  */
-const app = require('../app');
-const debug = require('debug')('fos:server');
-const http = require('http');
+import app from "../app.js";
+import debug0 from "debug";
+import http from "http";
 
+const debug = debug0('fos:server');
 /**
  * Get port from environment and store in Express.
  */

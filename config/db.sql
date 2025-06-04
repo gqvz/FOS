@@ -1,6 +1,10 @@
+DROP DATABASE IF EXISTS `FOS`;
+CREATE DATABASE `FOS`;
+USE `FOS`;
+
 CREATE TABLE `Users`
 (
-    `id`            INTEGER PRIMARY KEY,
+    `id`            INTEGER PRIMARY KEY AUTO_INCREMENT,
     `name`          VARCHAR(255)                     NOT NULL,
     `email`         VARCHAR(255)                     NOT NULL,
     `role`          ENUM ('customer','admin','chef') NOT NULL,
@@ -9,7 +13,7 @@ CREATE TABLE `Users`
 
 CREATE TABLE `Items`
 (
-    `id`           INTEGER PRIMARY KEY,
+    `id`           INTEGER PRIMARY KEY AUTO_INCREMENT,
     `name`         VARCHAR(32)   NOT NULL,
     `description`  VARCHAR(255)  NOT NULL,
     `price`        DECIMAL(6, 2) NOT NULL,
@@ -19,7 +23,7 @@ CREATE TABLE `Items`
 
 CREATE TABLE `Tags`
 (
-    `id`   INTEGER PRIMARY KEY,
+    `id`   INTEGER PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(32) NOT NULL
 );
 
@@ -32,7 +36,7 @@ CREATE TABLE `ItemTags`
 
 CREATE TABLE `Orders`
 (
-    `id`           INTEGER PRIMARY KEY,
+    `id`           INTEGER PRIMARY KEY AUTO_INCREMENT,
     `ordered_at`   DATETIME NOT NULL,
     `customer_id`  INTEGER  NOT NULL,
     `table_number` INTEGER  NOT NULL
@@ -40,7 +44,7 @@ CREATE TABLE `Orders`
 
 CREATE TABLE `OrderItems`
 (
-    `id`                  INTEGER PRIMARY KEY          NOT NULL,
+    `id`                  INTEGER PRIMARY KEY          NOT NULL AUTO_INCREMENT,
     `order_id`            INTEGER                      NOT NULL,
     `item_id`             INTEGER                      NOT NULL,
     `custom_instructions` VARCHAR(255)                 NOT NULL,
@@ -50,17 +54,18 @@ CREATE TABLE `OrderItems`
 
 CREATE TABLE `Sessions`
 (
-    `id`            INTEGER PRIMARY KEY,
+    `id`            INTEGER PRIMARY KEY AUTO_INCREMENT,
     `user_id`       INTEGER     NOT NULL,
     `refresh_token` CHAR(32)    NOT NULL,
     `name`          VARCHAR(32) NOT NULL,
     `created_at`    DATETIME    NOT NULL,
-    `last_login`    DATETIME    NOT NULL
+    `last_login`    DATETIME    NOT NULL,
+    `revoked`       BOOLEAN     NOT NULL
 );
 
 CREATE TABLE `Payments`
 (
-    `id`             INTEGER PRIMARY KEY,
+    `id`             INTEGER PRIMARY KEY AUTO_INCREMENT,
     `user_id`        INTEGER                         NOT NULL,
     `cashier_id`     INTEGER                         NOT NULL,
     `order_id`       INTEGER                         NOT NULL,
