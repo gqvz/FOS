@@ -5,31 +5,34 @@ import connection from "../../../db.js";
 const router = express.Router();
 
 // noinspection JSCheckFunctionSignatures
-router.get("/:id", isAuthorized(["customer", "chef", "admin"]), async (req, res) => {
-    const itemId = req.params.id;
+router.get("/:id", isAuthorized(["customer", "chef", "admin"]),
+    async (req, res) => {
+        const itemId = req.params.id;
 
-    if (!itemId || Number.isNaN(itemId)) {
-        return res.status(400).json({error: "Invalid item ID"});
-    }
-
-    try {
-        const [results] = await connection.query("SELECT * FROM Items WHERE id = ? LIMIT 1;", [itemId]);
-
-        if (results.length === 0) {
-            return res.status(404).json({error: "Item not found"});
+        if (!itemId || isNaN(itemId)) {
+            return res.status(400).json({error: "Invalid item ID"});
         }
 
-        const item = results[0];
+        try {
+            const [results] = await connection.query(
+                `SELECT Items.*,
+                        GROUP_CONCAT(DISTINCT Tags.name ORDER BY Tags.name SEPARATOR ',') AS tags
+                 FROM Items
+                          JOIN ItemTags ON ItemTags.item_id = Items.id
+                          JOIN Tags ON Tags.id = ItemTags.tag_id
+                 WHERE Items.id = ?`, [itemId]);
 
-        // Fetch associated tags
-        const [tagResults] = await connection.query("SELECT T.name FROM Tags T JOIN ItemTags IT ON T.id = IT.tag_id WHERE IT.item_id = ?;", [itemId]);
-        item.tags = tagResults.map(tag => tag.name);
+            if (results.length === 0) {
+                return res.status(404).json({error: "Item not found"});
+            }
 
-        res.status(200).json(item);
-    } catch (error) {
-        console.error("Error fetching item:", error);
-        res.status(500).json({error: "Internal server error"});
-    }
-});
+            const item = results[0];
+            item.tags = item.tags.split(',');
+            res.status(200).json(item);
+        } catch (error) {
+            console.error("Error fetching item:", error);
+            res.status(500).json({error: "Internal server error"});
+        }
+    });
 
 export default router;
