@@ -1,31 +1,33 @@
-import createError from "http-errors";
+import jwt from "jsonwebtoken";
+import express from "express"; // for intellisense
 
-const jwt = require("jsonwebtoken");
-const express = require("express");
-
-function isAuthorized(role) {
+function isAuthorized(roles) {
     /**
      * @param {express.Request} req
      * @param {express.Response} res
      * @param {express.NextFunction} next
      */
     function middleware(req, res, next) {
-        const jwt = req.cookies['jwt'];
-        if (!jwt) {
-            return next(createError(401));
+        const jwtToken = req.cookies['jwt'];
+        if (!jwtToken) {
+            return res.status(401).json({error: "Unauthorized access token"});
         }
-        jwt.verify(jwt, process.env.JWT_SECRET, {
+        jwt.verify(jwtToken, process.env.JWT_SECRET, {
             algorithms: ['HS256'],
             audience: "https://fos.garvit.tech",
             issuer: "https://fos.garvit.tech",
         }, (err, decoded) => {
             if (err) {
-                return next(createError(401));
+                return res.status(401).json({error: "Unauthorized access token"});
             }
 
-            if (decoded.role !== role) {
-                return next(createError(401));
+            if (!roles.includes(decoded.role)) {
+                return res.status(403).json({error: "You are not authorized to access this resource"});
             }
+
+            res.locals.userId = decoded.userId;
+            res.locals.role = decoded.role;
+            res.locals.sessionId = decoded.sessionId;
 
             next();
         })
@@ -33,4 +35,4 @@ function isAuthorized(role) {
     return middleware;
 }
 
-module.exports = isAuthorized;
+export default isAuthorized;
