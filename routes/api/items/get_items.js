@@ -7,7 +7,7 @@ const router = express.Router();
 // noinspection JSCheckFunctionSignatures
 router.get("/", isAuthorized(["customer", "chef", "admin"]),
     async (req, res) => {
-        const {tags, search, limit, skip} = req.query;
+        let {tags, search, limit, skip, available} = req.query;
 
         // Validate query parameters
         if (limit && isNaN(limit)) {
@@ -16,6 +16,14 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
 
         if (skip && isNaN(skip)) {
             return res.status(400).json({error: "Invalid start parameter"});
+        }
+
+        if (!available) {
+            available = 'true';
+        }
+
+        if (available && !['true', 'false'].includes(available)) {
+            return res.status(400).json({error: "Available must be 'true' or 'false'"});
         }
 
         // Default values for limit and start
@@ -41,26 +49,32 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
                               LEFT JOIN Tags TA ON ITA.tag_id = TA.id
                      WHERE T.name IN (${placeholders})
                        AND (I.name LIKE ? OR I.description LIKE ?)
+                       AND I.is_available = ?
                      GROUP BY I.id
                      HAVING COUNT(DISTINCT T.name) >= ?
                      ORDER BY I.id DESC
                      LIMIT ? OFFSET ?`;
             queryParams.push(...tagList);
-            queryParams.push(searchPattern, searchPattern, tagList.length, limitValue, startValue);
+            queryParams.push(searchPattern, searchPattern, available, tagList.length, limitValue, startValue);
 
         } else {
-            query = `SELECT *
-                     FROM Items
-                     WHERE name LIKE ?
-                        OR description LIKE ?
-                     GROUP BY id
-                     ORDER BY id DESC
+            query = `SELECT I.*, GROUP_CONCAT(TA.name ORDER BY TA.name SEPARATOR ',') AS tags
+                     FROM Items I
+                              LEFT JOIN ItemTags ITA ON I.id = ITA.item_id
+                              LEFT JOIN Tags TA ON ITA.tag_id = TA.id
+                     WHERE (I.name LIKE ?
+                         OR I.description LIKE ?)
+                       AND is_available = ?
+                     GROUP BY I.id
+                     ORDER BY I.id DESC
                      LIMIT ? OFFSET ?`;
-            queryParams.push(searchPattern, searchPattern, limitValue, startValue);
+            queryParams.push(searchPattern, searchPattern, available, limitValue, startValue);
         }
         const [results] = await connection.query(query, queryParams);
         for (const item of results) {
-            item.tags = item.tags.split(',');
+            if (item.tags) {
+                item.tags = item.tags.split(',');
+            }
         }
         res.send(results);
     });
