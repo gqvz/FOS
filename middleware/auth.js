@@ -8,9 +8,12 @@ function isAuthorized(roles) {
      * @param {express.NextFunction} next
      */
     function middleware(req, res, next) {
-        const jwtToken = req.cookies['jwt'];
+        let jwtToken = req.cookies['jwt'];
         if (!jwtToken) {
-            return res.status(401).json({error: "Unauthorized access token"});
+            jwtToken = req.headers['authorization']?.split(' ')[1];
+            if (!jwtToken) {
+                return res.status(401).json({error: "Unauthorized access token"});
+            }
         }
         jwt.verify(jwtToken, process.env.JWT_SECRET, {
             algorithms: ['HS256'],

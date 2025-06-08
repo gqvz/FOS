@@ -30,6 +30,7 @@ router.delete("/token",
             } else {
                 await connection.query("UPDATE Sessions SET revoked = TRUE WHERE refresh_token = ? OR id = ?;", [refreshToken, decoded.sessionId]);
             }
+            res.clearCookie("jwt", {httpOnly: true, secure: process.env.node_env === 'production', sameSite: 'strict'});
             res.status(204).send();
         } catch (error) {
             console.error("Error revoking refresh token:", error);
