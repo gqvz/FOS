@@ -48,9 +48,9 @@ CREATE TABLE `OrderItems`
     `id`                  INTEGER PRIMARY KEY          NOT NULL AUTO_INCREMENT,
     `order_id`            INTEGER                      NOT NULL,
     `item_id`             INTEGER                      NOT NULL,
-    `custom_instructions` VARCHAR(255)                 NOT NULL,
     `count`               INTEGER                      NOT NULL,
-    `status`              ENUM ('pending','completed') NOT NULL
+    `status`              ENUM ('pending','completed') NOT NULL,
+    `custom_instructions` VARCHAR(255)
 );
 
 CREATE TABLE `Sessions`
