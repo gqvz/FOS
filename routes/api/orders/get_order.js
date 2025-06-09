@@ -24,7 +24,28 @@ router.get("/:id", isAuthorized(["customer", "chef", "admin"]), async (req, res)
         }
 
         // Fetch the items associated with the order
-        const [orderItems] = await connection.query("SELECT * FROM OrderItems WHERE order_id = ?;", [orderId]);
+        // TODO: fix this query not timing out
+        const query = `SELECT OrderItems.id,
+                              custom_instructions,
+                              count,
+                              status,
+                              JSON_OBJECT(
+                                      'id', Items.id,
+                                      'name', Items.name,
+                                      'price', Items.price,
+                                      'description', Items.description,
+                                      'image_url', Items.image_url,
+                                      'is_available', Items.is_available,
+                                      'tags', IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
+                                                      FROM ItemTags
+                                                               JOIN Tags ON ItemTags.tag_id = Tags.id
+                                                      WHERE ItemTags.item_id = Items.id),
+                                                     JSON_ARRAY())
+                              ) AS item
+                       FROM OrderItems
+                                JOIN Items ON OrderItems.item_id = Items.id
+                       WHERE order_id = ?;`
+        const [orderItems] = await connection.query(query, [orderId]);
 
         // Combine the order details and items
         const response = {

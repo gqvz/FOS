@@ -6,7 +6,7 @@ const connection = await mysql.createConnection({
     host: DB_HOST,
     user: DB_USER,
     database: DB_NAME,
-    password: DB_PASSWORD,
+    password: DB_PASSWORD
 });
 
 export default connection;
