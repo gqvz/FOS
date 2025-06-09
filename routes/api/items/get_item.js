@@ -16,7 +16,10 @@ router.get("/:id", isAuthorized(["customer", "chef", "admin"]),
         try {
             const [results] = await connection.query(
                 `SELECT Items.*,
-                        GROUP_CONCAT(DISTINCT Tags.name ORDER BY Tags.name SEPARATOR ',') AS tags
+                        IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
+                                FROM Tags
+                                         JOIN ItemTags ON ItemTags.item_id = Items.id
+                                WHERE Tags.id = ItemTags.tag_id), JSON_ARRAY()) as tags
                  FROM Items
                           JOIN ItemTags ON ItemTags.item_id = Items.id
                           JOIN Tags ON Tags.id = ItemTags.tag_id
@@ -27,7 +30,6 @@ router.get("/:id", isAuthorized(["customer", "chef", "admin"]),
             }
 
             const item = results[0];
-            item.tags = item.tags.split(',');
             res.status(200).json(item);
         } catch (error) {
             console.error("Error fetching item:", error);

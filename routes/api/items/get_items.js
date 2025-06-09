@@ -18,13 +18,15 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
             return res.status(400).json({error: "Invalid start parameter"});
         }
 
+        if (available && !['false', 'true'].includes(available)) {
+            return res.status(400).json({error: "Available must be 'true' or 'false'"});
+        }
+
         if (!available) {
             available = 'true';
         }
 
-        if (available && !['true', 'false'].includes(available)) {
-            return res.status(400).json({error: "Available must be 'true' or 'false'"});
-        }
+        available = available === 'true' ? 1 : 0;
 
         // Default values for limit and start
         const limitValue = limit ? parseInt(limit) : 10;
@@ -41,7 +43,10 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
         if (tags) {
             const tagList = Array.isArray(tags) ? tags : tags.split(',');
             const placeholders = tagList.map(() => '?').join(', ');
-            query = `SELECT I.*, GROUP_CONCAT(TA.name ORDER BY TA.name SEPARATOR ',') AS tags
+            query = `SELECT I.*, IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
+                                         FROM Tags
+                                                  JOIN ItemTags ON ItemTags.item_id = I.id
+                                         WHERE Tags.id = ItemTags.tag_id), JSON_ARRAY()) as tags
                      FROM Items I
                               JOIN ItemTags IT ON I.id = IT.item_id
                               JOIN Tags T ON IT.tag_id = T.id
@@ -58,7 +63,11 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
             queryParams.push(searchPattern, searchPattern, available, tagList.length, limitValue, startValue);
 
         } else {
-            query = `SELECT I.*, GROUP_CONCAT(TA.name ORDER BY TA.name SEPARATOR ',') AS tags
+            query = `SELECT I.*,
+                            IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
+                                    FROM Tags
+                                             JOIN ItemTags ON ItemTags.item_id = I.id
+                                    WHERE Tags.id = ItemTags.tag_id), JSON_ARRAY()) as tags
                      FROM Items I
                               LEFT JOIN ItemTags ITA ON I.id = ITA.item_id
                               LEFT JOIN Tags TA ON ITA.tag_id = TA.id
@@ -71,11 +80,6 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
             queryParams.push(searchPattern, searchPattern, available, limitValue, startValue);
         }
         const [results] = await connection.query(query, queryParams);
-        for (const item of results) {
-            if (item.tags) {
-                item.tags = item.tags.split(',');
-            }
-        }
         res.send(results);
     });
 
