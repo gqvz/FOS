@@ -6,26 +6,26 @@ const router = express.Router();
 
 // noinspection JSCheckFunctionSignatures
 router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) => {
-    let { customerId, date, status, tableNumber, limit, skip } = req.query;
+    let {customerId, date, status, tableNumber, limit, skip} = req.query;
 
     if (customerId && isNaN(customerId)) {
-        return res.status(400).json({ error: "Invalid customer ID" });
+        return res.status(400).json({error: "Invalid customer ID"});
     }
 
     if (tableNumber && isNaN(tableNumber)) {
-        return res.status(400).json({ error: "Invalid table number" });
+        return res.status(400).json({error: "Invalid table number"});
     }
 
     if (date && isNaN(Date.parse(date))) {
-        return res.status(400).json({ error: "Invalid date format" });
+        return res.status(400).json({error: "Invalid date format"});
     }
 
     if (limit && isNaN(limit)) {
-        return res.status(400).json({ error: "Invalid limit" });
+        return res.status(400).json({error: "Invalid limit"});
     }
 
     if (skip && isNaN(skip)) {
-        return res.status(400).json({ error: "Invalid skip value" });
+        return res.status(400).json({error: "Invalid skip value"});
     }
 
     // loose typechecking below is intentional
@@ -39,7 +39,7 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) =>
     }
 
     if (customerId !== res.locals.userId && res.locals.role !== "admin") {
-        return res.status(403).json({ error: "You do not have permission to view these orders" });
+        return res.status(403).json({error: "You do not have permission to view these orders"});
     }
 
     if (res.locals.role !== "admin") {
@@ -47,7 +47,9 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) =>
     }
 
     // noinspection SqlConstantExpression
-    let query = `SELECT * FROM Orders WHERE 1=1`;
+    let query = `SELECT *
+                 FROM Orders
+                 WHERE 1 = 1`;
     const queryParams = [];
 
     if (customerId) {
@@ -76,13 +78,12 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) =>
     try {
         const [results] = await connection.query(query, queryParams);
         return res.status(200).json(results);
-    }
-    catch (error) {
-        if (error.sqlMessage === `Incorrect DATE value: '${date}'`){
-            return res.status(400).json({ error: "Invalid date format" });
+    } catch (error) {
+        if (error.sqlMessage === `Incorrect DATE value: '${date}'`) {
+            return res.status(400).json({error: "Invalid date format"});
         }
         console.error("Error fetching orders:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({error: "Internal server error"});
     }
 });
 

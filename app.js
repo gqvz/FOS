@@ -1,16 +1,16 @@
 import apiRouter from './routes/api/api.js';
 import createError from "http-errors";
 import express from "express";
-import path from "path";
+import path, {dirname} from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import {config} from "dotenv";
+import {fileURLToPath} from 'url';
+
 config({path: 'config/.env'})
 
 const app = express();
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 // Get the full path to this file
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +23,7 @@ app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -1,9 +1,8 @@
 import fs from "fs";
 
-import path from "path";
+import path, {dirname} from "path";
 import express from "express";
 import {fileURLToPath} from 'url';
-import {dirname} from 'path';
 
 // Get the full path to this file
 const __filename = fileURLToPath(import.meta.url);

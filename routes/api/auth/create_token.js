@@ -52,7 +52,12 @@ router.post("/token",
                 }
             );
 
-            res.cookie("jwt", token, {httpOnly: true, expires: new Date(Date.now() + 3600000), secure: process.env.node_env === 'production', sameSite: 'strict'});
+            res.cookie("jwt", token, {
+                httpOnly: true,
+                expires: new Date(Date.now() + 3600000),
+                secure: process.env.node_env === 'production',
+                sameSite: 'strict'
+            });
             res.send({token: token, refreshToken: refreshToken, "expiresIn": 3600});
         } catch (error) {
             console.error("Error storing refresh token:", error);

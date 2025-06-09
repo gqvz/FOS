@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import express from "express"; // for intellisense
+// noinspection ES6UnusedImports
+import express from "express";
 
 function isAuthorized(roles) {
     /**
@@ -35,6 +36,7 @@ function isAuthorized(roles) {
             next();
         })
     }
+
     return middleware;
 }
 

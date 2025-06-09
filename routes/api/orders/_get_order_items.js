@@ -84,7 +84,7 @@ async function get_order_items(req, res) {
                ) AS item
         FROM OrderItems
                  JOIN Items ON OrderItems.item_id = Items.id
-            JOIN Orders ON OrderItems.order_id = Orders.id
+                 JOIN Orders ON OrderItems.order_id = Orders.id
         WHERE 1 = 1`;
     const queryParams = [];
 

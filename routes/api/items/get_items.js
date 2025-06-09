@@ -43,10 +43,11 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
         if (tags) {
             const tagList = Array.isArray(tags) ? tags : tags.split(',');
             const placeholders = tagList.map(() => '?').join(', ');
-            query = `SELECT I.*, IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
-                                         FROM Tags
-                                                  JOIN ItemTags ON ItemTags.item_id = I.id
-                                         WHERE Tags.id = ItemTags.tag_id), JSON_ARRAY()) as tags
+            query = `SELECT I.*,
+                            IFNULL((SELECT JSON_ARRAYAGG(Tags.name)
+                                    FROM Tags
+                                             JOIN ItemTags ON ItemTags.item_id = I.id
+                                    WHERE Tags.id = ItemTags.tag_id), JSON_ARRAY()) as tags
                      FROM Items I
                               JOIN ItemTags IT ON I.id = IT.item_id
                               JOIN Tags T ON IT.tag_id = T.id

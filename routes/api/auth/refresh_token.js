@@ -60,7 +60,12 @@ router.post("/token/refresh",
             }
         );
 
-        res.cookie("jwt", token, {httpOnly: true, expires: new Date(Date.now() + 3600000), secure: process.env.node_env === 'production', sameSite: 'strict'});
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            expires: new Date(Date.now() + 3600000),
+            secure: process.env.node_env === 'production',
+            sameSite: 'strict'
+        });
         res.send({token: newToken, refreshToken: refreshToken, "expiresIn": 3600});
 
         // Update the last login time
