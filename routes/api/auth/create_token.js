@@ -35,13 +35,14 @@ router.post("/token",
 
         // Store the refresh token in the database
         try {
-            const [result] = await connection.execute("INSERT INTO Sessions (user_id, refresh_token, name, created_at, last_login, revoked) VALUES (?, ?, ?, ?, ?, FALSE);", [user.id, refreshToken, userAgent, new Date(), new Date()]);
+            const [result] = await connection.execute("INSERT INTO Sessions (user_id, refresh_token, name, created_at, last_login, revoked) VALUES (?, ?, ?, ?, ?, FALSE);", [user.id, refreshToken, userAgent.substring(0, 31), new Date(), new Date()]);
 
             const token = jwt.sign(
                 {
                     userId: user.id,
                     role: user.role,
-                    sessionId: result.insertId
+                    sessionId: result.insertId,
+                    email: user.email,
                 },
                 process.env.JWT_SECRET,
                 {
@@ -55,6 +56,11 @@ router.post("/token",
             res.cookie("jwt", token, {
                 httpOnly: true,
                 expires: new Date(Date.now() + 3600000),
+                secure: process.env.node_env === 'production',
+                sameSite: 'strict'
+            });
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
                 secure: process.env.node_env === 'production',
                 sameSite: 'strict'
             });

@@ -72,7 +72,7 @@ router.get("/:paymentId", isAuthorized(["customer", "chef", "admin"], true), asy
             return res.status(403).json({error: "You do not have permission to view this payment"});
         }
 
-        res.status(200).json({payment});
+        res.status(200).json(payment);
     }
     catch (err) {
         console.error("Error fetching payment:", err);

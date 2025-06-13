@@ -6,7 +6,11 @@ const router = express.Router();
 
 // noinspection JSCheckFunctionSignatures
 router.post("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) => {
-    const {userId, tableNumber} = req.body;
+    let {userId, tableNumber} = req.body;
+    if (!userId) {
+        userId = res.locals.userId;
+    }
+
     if (!tableNumber) {
         return res.status(400).json({error: "User ID and table number are required"});
     }

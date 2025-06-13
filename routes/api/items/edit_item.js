@@ -8,13 +8,13 @@ const router = express.Router();
 router.patch("/:id", isAuthorized(["admin"]),
     async (req, res) => {
         const itemId = req.params.id;
-        let {name, description, price, isAvailable, tags} = req.body;
+        let {name, description, price, isAvailable, tags, image_url} = req.body;
 
         if (!itemId || isNaN(itemId)) {
             return res.status(400).json({error: "Invalid item ID"});
         }
 
-        if (!name && !description && price === undefined && isAvailable === undefined && !tags) {
+        if (!name && !description && price === undefined && isAvailable === undefined && !tags && !image_url) {
             return res.status(400).json({error: "At least one field to update is required"});
         }
 
@@ -35,6 +35,10 @@ router.patch("/:id", isAuthorized(["admin"]),
 
         if (!description) {
             description = item.description;
+        }
+
+        if (!image_url) {
+            image_url = item.image_url;
         }
 
         if (price === undefined) {
@@ -62,8 +66,9 @@ router.patch("/:id", isAuthorized(["admin"]),
                                     SET name         = ?,
                                         description  = ?,
                                         price        = ?,
-                                        is_available = ?
-                                    WHERE id = ?;`, [name, description, price, isAvailable, itemId]);
+                                        is_available = ?,
+                                        image_url    = ?
+                                    WHERE id = ?;`, [name, description, price, isAvailable, image_url, itemId]);
 
             // Handle tags if provided
             if (tags) {

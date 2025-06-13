@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 // noinspection ES6UnusedImports
 import express from "express";
 
-function isAuthorized(roles) {
+function isAuthorized(roles, redirect = false) {
     /**
      * @param {express.Request} req
      * @param {express.Response} res
@@ -13,6 +13,9 @@ function isAuthorized(roles) {
         if (!jwtToken) {
             jwtToken = req.headers['authorization']?.split(' ')[1];
             if (!jwtToken) {
+                if (redirect) {
+                    return res.redirect("/login");
+                }
                 return res.status(401).json({error: "Unauthorized access token"});
             }
         }
@@ -22,6 +25,9 @@ function isAuthorized(roles) {
             issuer: "https://fos.garvit.tech",
         }, (err, decoded) => {
             if (err) {
+                if (redirect) {
+                    return res.redirect("/login");
+                }
                 return res.status(401).json({error: "Unauthorized access token"});
             }
 
@@ -30,6 +36,7 @@ function isAuthorized(roles) {
             }
 
             res.locals.userId = decoded.userId;
+            res.locals.email = decoded.email;
             res.locals.role = decoded.role;
             res.locals.sessionId = decoded.sessionId;
 

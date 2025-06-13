@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <title>FOS</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+</head>
+<body class="d-flex flex-column vh-100">
+<%- include("../partial/navbar.ejs") %>
+<div class="flex-fill mt-3 d-flex flex-column">
+    <div>
+        <h1 class="text-center mb-2"> Order <code>#<%- orderId %></code></h1>
+        <h4 class="text-center mb-1"> Ordered: <code id="order-date"></code></h4>
+        <h4 class="text-center mb-1"> Table number: <code id="order-table"></code></h4>
+        <h4 class="text-center mb-1"> Status: <code id="order-status"></code></h4>
+        <h4 class="text-center mb-1"> Subtotal: <code id="order-subtotal"></code></h4>
+    </div>
+    <div id="buttons" class="mb-4">
+        <div class="d-flex justify-content-center mt-3">
+            <button class="btn btn-primary me-2" id="button-1" onclick="window.location.href='/orders'">Close Order
+            </button>
+            <button class="btn btn-primary" id="button-2"
+                    onclick="window.location.href='/orders/print/<%- orderId %>'"></button>
+        </div>
+    </div>
+    <div class="container d-flex flex-column" id="item-list">
+        <h1 class="text-center">Loading</h1>
+    </div>
+</div>
+
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+
+<!--            TODO: pagination-->
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" placeholder="Search..." id="searchInput">
+                <div class="mb-3 d-flex flex-wrap gap-2" id="search-tag-buttons">
+                </div>
+                <hr>
+                <div id="search-list"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="search-button">Search</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">Add Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" placeholder="Add custom instructions"
+                       id="customInstructions">
+                <input type="number" class="form-control mb-3" placeholder="Count" id="itemCount" value="1" min="1"
+                       max="10" step="1">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="add-button">Add Item</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="tipModal" tabindex="-1" aria-labelledby="tipModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="tipModalLabel">Select tip</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="range" class="form-range" placeholder="Count" id="tipPercent" value="0" min="0"
+                       max="100" step="5">
+                <h1 class="text-center"><code id="tipPercentText">0%</code></h1>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirm-tip-button">Confirm</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
+
+<script type="module">
+    const orderId = <%- orderId %>;
+
+    const searchTags = [];
+
+    const tipInput = document.getElementById('tipPercent');
+    tipInput.onchange = function () {
+        const tipInput = document.getElementById('tipPercent');
+        const tipText = document.getElementById('tipPercentText');
+        tipText.textContent = tipInput.value + '%';
+    }
+
+    fetchOrder()
+
+    async function displayOrder(order) {
+        const orderedDateElement = document.getElementById('order-date');
+        orderedDateElement.textContent = new Date(order.ordered_at).toString().split("GMT")[0];
+        const orderStatusElement = document.getElementById('order-status');
+        orderStatusElement.textContent = order.status;
+        const orderTableElement = document.getElementById('order-table');
+        orderTableElement.textContent = order.table_number;
+        const orderSubtotalElement = document.getElementById('order-subtotal');
+        orderSubtotalElement.textContent = '$' + order.items.reduce((sum, x) => sum + x.count * x.item.price, 0);
+
+        const button1 = document.getElementById('button-1');
+        const button2 = document.getElementById('button-2');
+
+        if (order.status === 'open') {
+            button1.textContent = 'Add Item';
+            button1.onclick = showSearchModal;
+            button2.textContent = 'Close Order';
+            button2.onclick = showTipModal;
+        } else {
+            button1.textContent = 'Back to orders';
+            button1.onclick = () => {
+                window.location.href = '/orders';
+            };
+            button2.textContent = 'Go to payments';
+            button2.onclick = () => {
+                window.location.href = `/payments`;
+            };
+        }
+
+        const itemList = document.getElementById('item-list');
+        itemList.innerHTML = ''; // Clear existing items
+
+        for (const item of order.items) {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'container d-flex shadow p-4 rounded-3 bg-body-tertiary align-items-stretch mb-3';
+            itemElement.innerHTML = `
+            <div class="d-flex flex-column justify-content-between me-4">
+                <img src="${item.item.image_url}" class="rounded-3 object-fit-cover w-100 h-100 object-fit-contain" style="max-height: 200px" alt="image">
+            </div>
+            <div class="d-flex flex-column flex-grow-1">
+                <h1>${item.item.name}</h1>
+                <div class="d-flex mb-1">
+                    ${item.item.tags.map(tag => `<code class="p-1 shadow rounded-2 me-2 bg-body-secondary">${tag}</code>`).join('')}
+                </div>
+                <h5>${item.item.description}</h5>
+                <h5>${item.custom_instructions}</h5>
+            </div>
+            <h2 class="text-end pe-4 align-content-center"><code>${item.count + ' x $' + item.item.price.toFixed(2)}</code></h2>
+            `;
+            itemList.appendChild(itemElement);
+        }
+    }
+
+    async function showSearchModal() {
+        try {
+            const response = await fetch("/api/tags");
+            const tags = await response.json();
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + JSON.stringify(tags));
+            }
+            const tagButtons = document.getElementById('search-tag-buttons');
+            tagButtons.innerHTML = ''; // Clear existing buttons
+            tags.forEach(tag => {
+                const button = document.createElement('button');
+                button.className = 'btn btn-outline-secondary';
+                button.textContent = tag.name;
+                button.onclick = () => {
+                    if (searchTags.includes(tag.name)) {
+                        searchTags.splice(searchTags.indexOf(tag.name), 1);
+                        button.className = 'btn btn-outline-secondary';
+                    } else {
+                        searchTags.push(tag.name);
+                        button.className = 'btn btn-outline-secondary active';
+                    }
+                };
+                tagButtons.appendChild(button);
+            });
+            const searchButton = document.getElementById('search-button');
+            searchButton.onclick = performSearch;
+            const modal = new bootstrap.Modal(document.getElementById('searchModal'));
+            await performSearch();
+            modal.show();
+        } catch (error) {
+            alert('Error fetching tags: ' + error.message);
+        }
+    }
+
+    async function closeOrder(tipValue) {
+        console.log(tipValue);
+        try {
+            const response = await fetch("/api/orders/" + orderId, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: 'closed'
+                })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+            }
+            const response2 = await fetch('/api/payments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    tip: tipValue
+                })
+            });
+            if (!response2.ok) {
+                const errorData = await response2.json();
+                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+            }
+            window.location.reload();
+        } catch (error) {
+            alert('Error closing order: ' + error.message);
+            return;
+        }
+    }
+
+    async function showTipModal() {
+        const modal = new bootstrap.Modal(document.getElementById('tipModal'));
+        const confirmButton = document.getElementById('confirm-tip-button');
+        confirmButton.onclick = async () => {
+            const tipInput = document.getElementById('tipPercent');
+            const tipValue = parseInt(tipInput.value, 10);
+            if (isNaN(tipValue) || tipValue < 1 || tipValue > 100) {
+                alert('Please enter a valid tip amount between 1 and 100.');
+                return;
+            }
+
+            modal.hide();
+            const total = parseFloat(document.getElementById('order-subtotal').textContent.replace('$', ''));
+            await closeOrder(tipValue * total / 100);
+        }
+        const tipInput = document.getElementById('tipPercent');
+        tipInput.value = 0;
+        const tipText = document.getElementById('tipPercentText');
+        tipText.textContent = '0%';
+        modal.show();
+    }
+
+    async function fetchOrder() {
+        try {
+            const response = await fetch(`/api/orders/${orderId}`);
+            const order = await response.json();
+            if (!response.ok) {
+                throw new Error('Network response was not ok' + JSON.stringify(order));
+            }
+            await displayOrder(order);
+        } catch (error) {
+            alert(error);
+        }
+    }
+
+    async function addItem(id) {
+        const addModal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+        addModal.hide();
+        try {
+            const customInstructions = document.getElementById('customInstructions').value.trim();
+            const itemCount = parseInt(document.getElementById('itemCount').value, 10);
+            const response = await fetch(`/api/orders/${orderId}/items`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    itemId: id,
+                    quantity: itemCount,
+                    customInstructions: customInstructions
+                })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+            }
+            await fetchOrder();
+        } catch (error) {
+            alert('Error adding item: ' + error.message);
+        }
+    }
+
+    async function performSearch() {
+        const searchInput = document.getElementById('searchInput').value.trim();
+        const queryParams = new URLSearchParams({
+            tags: searchTags.join(',')
+        });
+        if (searchInput) {
+            queryParams.append('search', searchInput);
+        }
+        try {
+            const response = await fetch(`/api/items?${queryParams.toString()}`);
+            const items = await response.json();
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + JSON.stringify(items));
+            }
+            const itemList = document.getElementById('search-list');
+            itemList.innerHTML = ''; // Clear existing items
+            for (const item of items) {
+                const itemElement = document.createElement('div');
+                itemElement.role = 'button';
+                itemElement.onclick = async () => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('searchModal'));
+                    modal.hide();
+                    const addItemModal = new bootstrap.Modal(document.getElementById('addModal'));
+                    document.getElementById("add-button").onclick = async () => await addItem(item.id);
+                    addItemModal.show();
+                };
+                console.log(item);
+                itemElement.className = 'container d-flex shadow p-4 rounded-3 bg-body-tertiary align-items-stretch mb-3';
+                itemElement.innerHTML = `
+                    <div class="d-flex flex-column justify-content-between me-4">
+                        <img src="${item.image_url}" class="rounded-3 object-fit-cover w-100 h-100 object-fit-contain" style="max-height: 200px" alt="image">
+                    </div>
+                    <div class="d-flex flex-column flex-grow-1">
+                        <h1>${item.name}</h1>
+                        <div class="d-flex mb-1">
+                            ${item.tags.map(tag => `<code class="p-1 shadow rounded-2 me-2 bg-body-secondary">${tag}</code>`).join('')}
+                        </div>
+                        <h5>${item.description}</h5>
+                    </div>
+                    <h2 class="text-end pe-4 align-content-center"><code>$${parseInt(item.price).toFixed(2)}</code></h2>
+                `;
+                itemList.appendChild(itemElement);
+            }
+        } catch (error) {
+            alert('Error performing search: ' + error.message);
+        }
+    }
+</script>
+</body>
+</html>

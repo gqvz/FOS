@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <title>Orders</title>
+    <link rel='stylesheet' href='/stylesheets/orders.css'/>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+</head>
+<body class="d-flex vh-100 flex-column">
+<%- include("../partial/navbar.ejs") %>
+
+<div id="orders-list" class="container mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
+    <div role="button" onclick="window.location.href='/orders/1'" class="d-none border p-4 me-3 mb-3 rounded-3 bg-body-tertiary shadow">
+        <h1 class="text-center mb-3">Order #1</h1>
+        <hr>
+        <h4 class="text-center mb-3">Table Number: 8 </h4>
+        <h4 class="text-center"> Ordered on 1/1/1</h4>
+        <h4 class="text-center"> Status: closed</h4>
+    </div>
+</div>
+
+<script type="module">
+    const ordersList = document.getElementById('orders-list');
+
+    await fetchOrders();
+
+    function renderOrders(orders) {
+        console.log(orders);
+        for (const order of orders) {
+            const orderElement = document.createElement('div');
+            orderElement.className = 'border p-4 me-3 mb-3 rounded-3 bg-body-tertiary shadow';
+            orderElement.setAttribute('role', 'button');
+            orderElement.setAttribute('onclick', `window.location.href='/orders/${order.id}'`);
+
+            orderElement.innerHTML = `
+                <h1 class="text-center mb-3">Order <code>#${order.id}</code></h1>
+                <hr>
+                <h4 class="text-center mb-3">Table Number: <code>${order.table_number}</code></h4>
+                <h4 class="text-center">Ordered: <code>${new Date(order.ordered_at).toString().split("GMT")[0]}</code></h4>
+                <h4 class="text-center">Status: <code>${order.status}</code></h4>
+            `;
+
+            ordersList.appendChild(orderElement);
+        }
+    }
+
+    async function fetchOrders() {
+        try {
+            const response = await fetch('/api/orders');
+            const orders = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            renderOrders(orders);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            ordersList.innerHTML = '<h2 class="text-center text-danger">Failed to load orders</h2>';
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
+</body>
+</html>

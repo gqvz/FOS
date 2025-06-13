@@ -6,11 +6,11 @@ const router = express.Router();
 
 router.delete("/token",
     async (req, res) => {
-        const token = req.cookies['jwt'];
-        const refreshToken = req.body.refreshToken;
+        const token = req.cookies['jwt'] ?? req.body.token;
+        const refreshToken = req.body.refreshToken ?? req.cookies['refreshToken'];
 
         if (!token && !refreshToken) {
-            return res.status(400).json({error: "Atleast one of JWT token or refresh token is required"});
+            return res.status(400).json({error: "At least one of JWT token or refresh token is required"});
         }
 
         let decoded;
@@ -30,6 +30,7 @@ router.delete("/token",
             } else {
                 await connection.query("UPDATE Sessions SET revoked = TRUE WHERE refresh_token = ? OR id = ?;", [refreshToken, decoded.sessionId]);
             }
+            res.clearCookie("refreshToken", {httpOnly: true, secure: process.env.node_env === 'production', sameSite: 'strict'});
             res.clearCookie("jwt", {httpOnly: true, secure: process.env.node_env === 'production', sameSite: 'strict'});
             res.status(204).send();
         } catch (error) {

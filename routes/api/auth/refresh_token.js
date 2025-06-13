@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.post("/token/refresh",
     async (req, res) => {
-        const {refreshToken} = req.body;
+        const refreshToken = req.body.refreshToken ?? req.cookies['refreshToken'];
 
-        const token = req.cookies['jwt'];
+        const token = req.cookies['jwt'] ?? req.body.token;
 
         if (!token) {
             return res.status(401).json({error: "Unauthorized"});
@@ -49,7 +49,8 @@ router.post("/token/refresh",
             {
                 userId: userId,
                 role: userRole,
-                sessionId: sessionId
+                sessionId: sessionId,
+                email: decoded.email,
             },
             process.env.JWT_SECRET,
             {
