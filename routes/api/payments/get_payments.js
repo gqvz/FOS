@@ -19,11 +19,7 @@ router.get("/", isAuthorized(["customer", "chef", "admin"], true), async (req, r
         return res.status(403).json({error: "You are not authorized to view payments for this user"});
     }
 
-    if (!status) {
-        status = "processing";
-    }
-
-    if (["processing", "completed"].indexOf(status) === -1) {
+    if (status && ["processing", "completed"].indexOf(status) === -1) {
         return res.status(400).json({error: "Invalid status"});
     }
 

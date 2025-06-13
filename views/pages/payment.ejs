@@ -21,6 +21,11 @@
         <h5 class="text-center mb-2">Ordered: <code id="orderedAt"></code></h5>
         <h5 class="text-center mb-2">Table Number: <code id="tableNumber"></code></h5>
     </div>
+    <% if (role === "admin") { %>
+        <div class="container">
+            <button class="btn btn-success w-100" id="complete-button"> Mark as completed</button>
+        </div>
+    <% } %>
     <hr>
     <div class="container d-flex flex-column" id="item-list">
         <div class="w-100 p-4 rounded-3 shadow bg-body-tertiary">
@@ -36,7 +41,7 @@
                         </tr>
                         </thead>
                         <tbody id="item-list-body">
-                            <!-- Items will be rendered here -->
+                        <!-- Items will be rendered here -->
                         </tbody>
                     </table>
                 </div>
@@ -59,6 +64,28 @@
         document.getElementById('cashierId').textContent = payment.cashier_id;
         document.getElementById('orderedAt').textContent = new Date(payment.order.ordered_at).toString().split('GMT')[0];
         document.getElementById('tableNumber').textContent = payment.order.table_number;
+
+        if (payment.status === 'completed') {
+            document.getElementById('complete-button').style.display = 'none';
+        } else {
+            document.getElementById('complete-button').addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`/api/payments/${paymentId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({status: 'completed'})
+                    });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error completing payment:', error);
+                }
+            });
+        }
 
         const itemListBody = document.getElementById('item-list-body');
         itemListBody.innerHTML = ''; // Clear existing items
