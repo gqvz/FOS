@@ -36,6 +36,9 @@ app.use('/', indexRouter);
 import loginRouter from './routes/login.js';
 app.use('/', loginRouter);
 
+import signupRouter from './routes/signup.js';
+app.use('/', signupRouter);
+
 import ordersRouter from './routes/orders.js';
 app.use('/', ordersRouter);
 

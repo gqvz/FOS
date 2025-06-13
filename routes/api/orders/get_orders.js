@@ -28,7 +28,6 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) =>
         return res.status(400).json({error: "Invalid skip value"});
     }
 
-    // loose typechecking below is intentional
     // noinspection EqualityComparisonWithCoercionJS
 
     const limitValue = limit ? parseInt(limit) : 10;
@@ -38,7 +37,7 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]), async (req, res) =>
         return res.status(400).json({error: "Limit must be at least 1 and start must be at least 0"});
     }
 
-    if (customerId !== res.locals.userId && res.locals.role !== "admin") {
+    if (customerId && customerId !== res.locals.userId && res.locals.role !== "admin") {
         return res.status(403).json({error: "You do not have permission to view these orders"});
     }
 
