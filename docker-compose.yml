@@ -21,6 +21,7 @@ services:
       DB_NAME: FOS
       DB_USER: root
       DB_PASSWORD: FOS
+      NODE_ENV: production
     depends_on:
       - mysql
 
