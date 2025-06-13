@@ -14,6 +14,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      PORT: 3000
       FOS_DB_HOST: mysql
       JWT_SECRET: J3kQm7Hk214S5DF
       DB_HOST: mysql

@@ -30,26 +30,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/api", apiRouter);
 
-import indexRouter from './routes/index.js';
+import indexRouter from './routes/pages/index.js';
 app.use('/', indexRouter);
 
-import loginRouter from './routes/login.js';
+import loginRouter from './routes/pages/login.js';
 app.use('/', loginRouter);
 
-import signupRouter from './routes/signup.js';
+import signupRouter from './routes/pages/signup.js';
 app.use('/', signupRouter);
 
-import ordersRouter from './routes/orders.js';
+import ordersRouter from './routes/pages/orders.js';
 app.use('/', ordersRouter);
 
-import orderRouter from './routes/order.js';
+import orderRouter from './routes/pages/order.js';
 app.use('/', orderRouter);
 
-import paymentsRouter from './routes/payments.js';
+import paymentsRouter from './routes/pages/payments.js';
 app.use('/', paymentsRouter);
 
-import paymentRouter from './routes/payment.js';
+import paymentRouter from './routes/pages/payment.js';
 app.use('/', paymentRouter);
+
+import chefRouter from './routes/pages/chef.js';
+app.use('/', chefRouter);
+
+import menuRouter from './routes/pages/menu.js';
+app.use('/', menuRouter);
+
+import adminRouter from './routes/pages/admin.js';
+app.use('/', adminRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

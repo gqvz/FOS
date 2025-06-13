@@ -1,10 +1,10 @@
 import express from 'express';
-import isAuthorized from "../middleware/auth.js";
+import isAuthorized from "../../middleware/auth.js";
 
 const router = express.Router();
 
 router.get("/orders", isAuthorized(["customer", "chef", "admin"], true), (req, res) => {
-    res.render("pages/orders", {emails:res.locals.email});
+    res.render("pages/orders", {emails:res.locals.email, role:res.locals.role});
 });
 
 export default router;

@@ -45,8 +45,6 @@
                 body: JSON.stringify({email, password})
             });
             if (result.ok) {
-                const data = await result.json();
-                console.log('Login successful:', data);
                 window.location.href = '/';
             } else {
                 const errorData = await result.json();
