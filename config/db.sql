@@ -102,3 +102,6 @@ ALTER TABLE `Payments`
 
 ALTER TABLE `Payments`
     ADD FOREIGN KEY (`order_id`) REFERENCES `Orders` (`id`);
+
+# create a admin user with password 30358d2619cb
+INSERT INTO Users(name, email, role, password_hash) VALUE ('admin', 'admin@fos.com', 'admin', '$2b$10$uf.ZvtsVJMB9Wb2FC4M.AedEfJ3IUlD9p4ln7CdbeDpLJMy7VqHIu')

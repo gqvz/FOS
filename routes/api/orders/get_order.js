@@ -24,7 +24,6 @@ router.get("/:id", isAuthorized(["customer", "chef", "admin"]), async (req, res)
         }
 
         // Fetch the items associated with the order
-        // TODO: fix this query not timing out
         const query = `SELECT OrderItems.id,
                               custom_instructions,
                               count,

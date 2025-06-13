@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: FOS
+    volumes:
+      - mysql_data:/var/lib/mysql
+  fos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fos_container
+    ports:
+      - "3000:3000"
+    environment:
+      FOS_DB_HOST: mysql
+      JWT_SECRET: J3kQm7Hk214S5DF
+      DB_HOST: mysql
+      DB_NAME: FOS
+      DB_USER: root
+      DB_PASSWORD: FOS
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+    driver: local
