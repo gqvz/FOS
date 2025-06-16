@@ -28,7 +28,13 @@ router.post("/", isAuthorized(["admin"]),
         }
 
         if (!imageUrl) {
-            imageUrl = "http.cat/404"
+            imageUrl = "https://http.cat/404"
+        }
+
+        // check if the item already exists
+        const [existingItems] = await connection.query("SELECT * FROM Items WHERE name = ? LIMIT 1;", [name]);
+        if (existingItems.length > 0) {
+            return res.status(400).json({error: "Item with this name already exists"});
         }
 
         // check if the tags exist

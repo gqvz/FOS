@@ -21,7 +21,6 @@ router.post("/token/refresh",
                 audience: "https://fos.garvit.tech",
                 issuer: "https://fos.garvit.tech",
             });
-            console.log(decoded);
             if (!decoded || !decoded.userId || !decoded.role || !decoded.sessionId) {
                 return res.status(401).json({error: "Invalid JWT token"});
             }

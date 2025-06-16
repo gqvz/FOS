@@ -65,6 +65,8 @@
         document.getElementById('orderedAt').textContent = new Date(payment.order.ordered_at).toString().split('GMT')[0];
         document.getElementById('tableNumber').textContent = payment.order.table_number;
 
+        <% if (role === "admin") { %>
+
         if (payment.status === 'completed') {
             document.getElementById('complete-button').style.display = 'none';
         } else {
@@ -87,8 +89,10 @@
             });
         }
 
+        <% } %>
+
         const itemListBody = document.getElementById('item-list-body');
-        itemListBody.innerHTML = ''; // Clear existing items
+        itemListBody.innerHTML = '';
         payment.order.items.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `

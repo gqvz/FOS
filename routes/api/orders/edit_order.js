@@ -24,7 +24,7 @@ router.patch("/:id", isAuthorized(["admin", "customer", "chef"]), async (req, re
             return res.status(404).json({error: "Order not found"});
         }
 
-        if (results[0].user_id !== res.locals.userId && res.locals.role !== "admin") {
+        if (results[0].customer_id !== res.locals.userId && res.locals.role !== "admin") {
             return res.status(403).json({error: "You do not have permission to edit this order"});
         }
 

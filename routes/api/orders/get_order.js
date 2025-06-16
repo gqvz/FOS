@@ -19,7 +19,7 @@ router.get("/:id", isAuthorized(["customer", "chef", "admin"]), async (req, res)
             return res.status(404).json({error: "Order not found"});
         }
 
-        if (orderDetails[0].user_id !== res.locals.userId && res.locals.role !== "admin") {
+        if (orderDetails[0].customer_id !== res.locals.userId && res.locals.role !== "admin") {
             return res.status(403).json({error: "You do not have permission to view this order"});
         }
 

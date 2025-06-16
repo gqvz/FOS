@@ -41,7 +41,7 @@ async function create_order_item(req, res) {
             return res.status(400).json({error: "Cannot add items to an order that is not closed"});
         }
 
-        if (orderResults[0].user_id !== res.locals.userId && res.locals.role !== "admin") {
+        if (orderResults[0].customer_id !== res.locals.userId && res.locals.role !== "admin") {
             return res.status(403).json({error: "You do not have permission to add items to this order"});
         }
 

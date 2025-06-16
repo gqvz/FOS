@@ -33,6 +33,10 @@
     async function createOrder() {
         const tableNumber = document.getElementById('tableNumber').value;
         if (tableNumber) {
+            if (tableNumber < 1 || tableNumber > 100) {
+                alert('Table number must be between 1 and 100.');
+                return;
+            }
             console.log(`Creating order for table number: ${tableNumber}`);
             const result = await fetch("/api/orders", {
                 method: "POST",
