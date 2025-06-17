@@ -93,6 +93,10 @@
 
         const itemListBody = document.getElementById('item-list-body');
         itemListBody.innerHTML = '';
+        if (!payment.order.items) {
+            itemListBody.innerHTML = `<tr><td colspan="3" class="text-center">No items in this order</td></tr>`;
+            return;
+        }
         payment.order.items.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `

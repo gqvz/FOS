@@ -26,8 +26,11 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
             available = 'true';
         }
 
-        available = available === 'true' ? 1 : 0;
-
+        if (available === 'true' || available === 'false') {
+            available = available === 'true';
+        } else {
+            available = 'all';
+        }
         // Default values for limit and start
         const limitValue = limit ? parseInt(limit) : 10;
         const startValue = skip ? parseInt(skip) : 0;
@@ -54,14 +57,19 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
                               LEFT JOIN ItemTags ITA ON I.id = ITA.item_id
                               LEFT JOIN Tags TA ON ITA.tag_id = TA.id
                      WHERE T.name IN (${placeholders})
-                       AND (I.name LIKE ? OR I.description LIKE ?)
-                       AND I.is_available = ?
-                     GROUP BY I.id
+                       AND (I.name LIKE ? OR I.description LIKE ?)`;
+
+            if (available !== 'all') {
+                query += `\nAND I.is_available = ?`;
+            }
+            query += `\nGROUP BY I.id
                      HAVING COUNT(DISTINCT T.name) >= ?
                      ORDER BY I.id DESC
                      LIMIT ? OFFSET ?`;
             queryParams.push(...tagList);
-            queryParams.push(searchPattern, searchPattern, available, tagList.length, limitValue, startValue);
+            queryParams.push(searchPattern, searchPattern)
+            if (available !== 'all') queryParams.push(available);
+            queryParams.push(tagList.length, limitValue, startValue);
 
         } else {
             query = `SELECT I.*,
@@ -73,15 +81,22 @@ router.get("/", isAuthorized(["customer", "chef", "admin"]),
                               LEFT JOIN ItemTags ITA ON I.id = ITA.item_id
                               LEFT JOIN Tags TA ON ITA.tag_id = TA.id
                      WHERE (I.name LIKE ?
-                         OR I.description LIKE ?)
-                       AND is_available = ?
-                     GROUP BY I.id
+                         OR I.description LIKE ?)`;
+            if (available !== 'all') {
+                query += `\nAND is_available = ?`;
+            }
+            query += `\nGROUP BY I.id
                      ORDER BY I.id DESC
                      LIMIT ? OFFSET ?`;
-            queryParams.push(searchPattern, searchPattern, available, limitValue, startValue);
+            queryParams.push(searchPattern, searchPattern);
+            if (available !== 'all')
+                queryParams.push(available);
+            queryParams.push(limitValue, startValue);
         }
         const [results] = await connection.query(query, queryParams);
         res.send(results);
-    });
+    }
+)
+;
 
 export default router;

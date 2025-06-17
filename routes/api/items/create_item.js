@@ -39,8 +39,8 @@ router.post("/", isAuthorized(["admin"]),
 
         // check if the tags exist
         let tagIds = [];
-        if (tags) {
-            tags = Array.isArray(tags) ? tags : [tags];
+        tags = Array.isArray(tags) ? tags : [tags];
+        if (tags && tags.length > 0) {
             const tagPlaceholders = tags.map(() => '?').join(', ');
             const [tagResults] = await connection.query(`SELECT id
                                                          FROM Tags

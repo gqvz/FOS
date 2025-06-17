@@ -52,10 +52,8 @@ router.patch("/:id", isAuthorized(["admin"]),
 
         if (isAvailable === undefined) {
             isAvailable = item.is_available;
-        } else if (isAvailable !== 'true' && isAvailable !== 'false') {
+        } else if (isAvailable !== true && isAvailable !== false) {
             return res.status(400).json({error: "isAvailable must be a boolean"});
-        } else {
-            isAvailable = isAvailable === 'true';
         }
 
         try {
