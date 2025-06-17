@@ -25,10 +25,6 @@ router.get("/", isAuthorized(['admin']), async (req, res) => {
 
         const [results] = await connection.query(query, params);
 
-        if (results.length === 0) {
-            return res.status(404).json({error: "No requests found"});
-        }
-
         res.status(200).json(results);
     } catch (error) {
         console.error("Error fetching requests:", error);
