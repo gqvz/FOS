@@ -76,7 +76,7 @@
         const modalBody = document.querySelector('#notification-view-modal .modal-body');
         modalBody.innerHTML = ''; // Clear previous content
         <% for (let i = 0; i < unread.length; i++) { %>
-        modalBody.innerHTML += `--> Your request to change role to <code><%- unread[i].role %></code> has been <code><%- unread[i].status %></code>`;
+        modalBody.innerHTML += `--> Your request to change role to <code><%- unread[i].role %></code> has been <code><%- unread[i].status %></code><br>`;
         <% } %>
         viewModal.show();
         const response = await fetch('/read', {
