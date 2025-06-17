@@ -6,9 +6,9 @@ const router = express.Router();
 
 // noinspection JSCheckFunctionSignatures
 router.get("/", isAuthorized(['admin']), async (req, res) => {
-    const {status} = req.body;
+    const {status} = req.query;
 
-    if (status && !['pending', 'approved', 'rejected'].includes(status)) {
+    if (status && !['pending', 'granted', 'rejected'].includes(status)) {
         return res.status(400).json({error: "Invalid status"});
     }
 
