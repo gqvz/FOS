@@ -58,6 +58,26 @@
     </div>
 </nav>
 <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const role = '<%- role %>';
+        const response = await fetch('/api/users/me');
+        if (!response.ok) {
+            console.error('Failed to fetch user data:', response.statusText);
+            return;
+        }
+        const userData = await response.json();
+        if (userData.role !== role) {
+            const refreshResponse = await fetch("/api/auth/refresh");
+            if (!refreshResponse.ok) {
+                console.error('Failed to refresh token:', refreshResponse.statusText);
+                alert('Session expired, please log in again.');
+                window.location.href = '/login';
+            } else {
+                // Reload the page to reflect the new role
+                window.location.reload();
+            }
+        }
+    });
     async function changeRoles() {
         const modal = bootstrap.Modal.getInstance(document.getElementById("role-modal")) || new bootstrap.Modal(document.getElementById('role-modal'));
         const roleSelect = document.getElementById('request-role');

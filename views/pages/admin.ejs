@@ -708,7 +708,6 @@
             const nameInput = document.getElementById('edit-user-name');
             const emailInput = document.getElementById('edit-user-email');
             const roleSelect = document.getElementById('edit-user-role');
-            const passInput = document.getElementById('edit-user-pass');
 
             const user = searchUserResult.find(u => u.id === id);
 
@@ -720,8 +719,6 @@
             nameInput.value = user.name;
             emailInput.value = user.email;
             roleSelect.value = user.role;
-            passInput.value = '';
-            passInput.placeholder = 'Leave empty to keep current password';
 
             const saveButton = document.querySelector('#edit-user-modal .btn-primary');
             saveButton.onclick = async () => {
@@ -731,10 +728,6 @@
                     email: emailInput.value.trim(),
                     role: roleSelect.value,
                 };
-
-                if (passInput.value.trim()) {
-                    updatedUser.password = passInput.value.trim();
-                }
 
                 const response = await fetch(`/api/users/${user.id}`, {
                     method: 'PATCH',

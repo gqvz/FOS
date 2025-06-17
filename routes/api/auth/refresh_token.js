@@ -38,7 +38,9 @@ router.post("/token/refresh",
         }
         const session = result[0];
         const userId = session.user_id;
-        const userRole = session.role;
+        const [userResult] = await connection.query("SELECT * FROM Users WHERE id = ? LIMIT 1;", [userId]);
+        const user = userResult[0];
+        const userRole = user.role;
         const sessionId = session.id;
         if (userId !== decoded.userId || sessionId !== decoded.sessionId) {
             return res.status(401).json({error: "Invalid session"});
@@ -49,8 +51,8 @@ router.post("/token/refresh",
                 userId: userId,
                 role: userRole,
                 sessionId: sessionId,
-                email: decoded.email,
-                name: decoded.name
+                email: user.email,
+                name: user.name
             },
             process.env.JWT_SECRET,
             {
