@@ -12,6 +12,23 @@ router.post("/", isAuthorized(['customer', 'chef', 'admin']), async (req, res) =
         return res.status(400).json({error: "Invalid role"});
     }
 
+    // get the user's role
+    try {
+        const [userResults] = await connection.query(
+            "SELECT role FROM Users WHERE id = ? LIMIT 1;",
+            [res.locals.userId]
+        );
+
+        if (userResults.length === 0) {
+            return res.status(404).json({error: "User not found"});
+        }
+
+        res.locals.role = userResults[0].role;
+    } catch (err) {
+        console.error("Error fetching user role:", err);
+        return res.status(500).json({error: "Internal server error"});
+    }
+
     if (role === res.locals.role) {
         return res.status(400).json({error: "You cannot create a request for your own role"});
     }
