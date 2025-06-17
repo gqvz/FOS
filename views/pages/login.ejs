@@ -15,8 +15,8 @@
         <h1 class="text-center mb-4">Login to FOS</h1>
         <form>
             <div class="mb-3 form-floating">
-                <input type="email" class="form-control" id="input-email" placeholder="name@example.com" required>
-                <label for="input-email">Email address</label>
+                <input type="text" class="form-control" id="input-name" placeholder="name" required>
+                <label for="input-name">Username</label>
             </div>
             <div class="mb-3 form-floating">
                 <input type="password" class="form-control" id="input-password" placeholder="Password" required>
@@ -32,17 +32,17 @@
 </div>
 <script>
     async function login() {
-        const email = document.getElementById('input-email').value;
+        const name = document.getElementById('input-name').value;
         const password = document.getElementById('input-password').value;
 
-        if (email && password) {
-            console.log(`Logging in with email: ${email} and password: ${password}`);
+        if (name && password) {
+            console.log(`Logging in with email: ${name} and password: ${password}`);
             const result = await fetch("/api/auth/token", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({name, password})
             });
             if (result.ok) {
                 window.location.href = '/';

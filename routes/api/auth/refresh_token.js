@@ -50,6 +50,7 @@ router.post("/token/refresh",
                 role: userRole,
                 sessionId: sessionId,
                 email: decoded.email,
+                name: decoded.name
             },
             process.env.JWT_SECRET,
             {

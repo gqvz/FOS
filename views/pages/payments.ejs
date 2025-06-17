@@ -52,7 +52,8 @@
             const response = await fetch('/api/payments');
             const payments = await response.json();
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await payments.json();
+                throw new Error(errorData.error);
             }
             renderPayments(payments);
         } catch (error) {

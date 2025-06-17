@@ -181,7 +181,7 @@
             const response = await fetch("/api/tags");
             const tags = await response.json();
             if (!response.ok) {
-                throw new Error('Network response was not ok: ' + JSON.stringify(tags));
+                throw new Error(tags.error);
             }
             const tagButtons = document.getElementById('search-tag-buttons');
             tagButtons.innerHTML = ''; // Clear existing buttons
@@ -224,7 +224,7 @@
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+                throw new Error(errorData.error);
             }
             const response2 = await fetch('/api/payments', {
                 method: 'POST',
@@ -238,7 +238,7 @@
             });
             if (!response2.ok) {
                 const errorData = await response2.json();
-                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+                throw new Error(errorData.error);
             }
             window.location.reload();
         } catch (error) {
@@ -274,7 +274,7 @@
             const response = await fetch(`/api/orders/${orderId}`);
             const order = await response.json();
             if (!response.ok) {
-                throw new Error('Network response was not ok' + JSON.stringify(order));
+                throw new Error(order.error);
             }
             await displayOrder(order);
         } catch (error) {
@@ -301,7 +301,7 @@
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error('Network response was not ok: ' + JSON.stringify(errorData));
+                throw new Error(errorData.error);
             }
             await fetchOrder();
         } catch (error) {
@@ -321,7 +321,7 @@
             const response = await fetch(`/api/items?${queryParams.toString()}`);
             const items = await response.json();
             if (!response.ok) {
-                throw new Error('Network response was not ok: ' + JSON.stringify(items));
+                throw new Error(items.error);
             }
             const itemList = document.getElementById('search-list');
             itemList.innerHTML = ''; // Clear existing items

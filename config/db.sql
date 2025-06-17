@@ -76,6 +76,15 @@ CREATE TABLE `Payments`
     `total`          DECIMAL(6, 2) GENERATED ALWAYS AS (order_subtotal + tip) STORED
 );
 
+CREATE TABLE `Requests`
+(
+    `id`         INTEGER PRIMARY KEY AUTO_INCREMENT,
+    `user_id`    INTEGER                                 NOT NULL,
+    `role`       ENUM ('customer', 'chef', 'admin')      NOT NULL,
+    `status`     ENUM ('pending', 'granted', 'rejected') NOT NULL,
+    `granted_by` INTEGER
+);
+
 ALTER TABLE `ItemTags`
     ADD FOREIGN KEY (`item_id`) REFERENCES `Items` (`id`);
 
@@ -103,5 +112,12 @@ ALTER TABLE `Payments`
 ALTER TABLE `Payments`
     ADD FOREIGN KEY (`order_id`) REFERENCES `Orders` (`id`);
 
+ALTER TABLE `Requests`
+    ADD FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`);
+
+ALTER TABLE `Requests`
+    ADD FOREIGN KEY (`granted_by`) REFERENCES `Users` (`id`);
+
 # create a admin user with password 30358d2619cb
-INSERT INTO Users(name, email, role, password_hash) VALUE ('admin', 'admin@fos.com', 'admin', '$2b$10$uf.ZvtsVJMB9Wb2FC4M.AedEfJ3IUlD9p4ln7CdbeDpLJMy7VqHIu')
+INSERT INTO Users(name, email, role, password_hash) VALUE ('admin', 'admin@fos.com', 'admin',
+                                                           '$2b$10$uf.ZvtsVJMB9Wb2FC4M.AedEfJ3IUlD9p4ln7CdbeDpLJMy7VqHIu')

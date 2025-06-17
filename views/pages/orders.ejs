@@ -51,7 +51,7 @@
             const response = await fetch('/api/orders');
             const orders = await response.json();
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(orders.error);
             }
             renderOrders(orders);
         } catch (error) {

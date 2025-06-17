@@ -18,6 +18,7 @@
     <button type="button" class="btn btn-primary" onclick="setTab(2)">Items</button>
     <button type="button" class="btn btn-primary" onclick="setTab(3)">Tags</button>
     <button type="button" class="btn btn-primary" onclick="setTab(4)">Users</button>
+    <button type="button" class="btn btn-primary" onclick="setTab(5)">Requests</button>
 </div>
 <hr>
 <div class="flex-fill tabs d-none">
@@ -654,7 +655,6 @@
                         <option value="chef">Chef</option>
                         <option value="admin">Admin</option>
                     </select>
-                    <input type="password" class="form-control mt-2" id="edit-user-pass" placeholder="Password">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -752,6 +752,98 @@
                 }
             };
             modal.show();
+        }
+    </script>
+</div>
+<div class="flex-fill tabs d-none">
+    <div>
+        <div class="container d-flex">
+            <select class="form-select me-3 w-25" id="request-status-select" aria-label="Status select"
+                    onchange="searchRequests()">
+                <option value="" selected>All</option>
+                <option value="customer">Pending</option>
+                <option value="chef">Rejected</option>
+                <option value="admin">Granted</option>
+            </select>
+        </div>
+        <div class="container d-flex flex-column">
+            <div class="table-responsive mt-3">
+                <table class="table table-striped mw-100 table-hover" id="request-list">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col" class="text-center">Username</th>
+                        <th scope="col" class="text-center">Email</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Role requested</th>
+                        <th scope="col" class="text-center">Granted by</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        window.searchRequests = searchRequests;
+
+        await searchRequests();
+
+        async function searchRequests() {
+            const statusSelect = document.getElementById('request-status-select');
+            const status = statusSelect.value;
+
+            const response = await fetch(`/api/requests?status=${status}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert('Failed to fetch requests: ' + errorData.error);
+                return;
+            }
+
+            const requests = await response.json();
+            const requestList = document.getElementById('request-list');
+
+            requestList.querySelector('tbody').innerHTML = '';
+            requests.forEach(request => {
+                const row = document.createElement('tr');
+                let innerHTML = `
+                    <td>${request.id}</td>
+                    <td class="text-center">${request.user_name}</td>
+                    <td class="text-center">${request.user_email}</td>
+                    <td class="text-center">${request.status}</td>
+                    <td class="text-center">${request.role}</td>
+                    <td class="text-center">${request.granted_by || 'N/A'}</td>
+                    <td class="text-end">`;
+                if (request.status === 'pending') {
+                    innerHTML += `
+                        <button class="btn btn-success" onclick="handleRequest(${request.id}, 'granted')">Grant</button>
+                        <button class="btn btn-danger" onclick="handleRequest(${request.id}, 'rejected')">Reject</button>`;
+                }
+                innerHTML += `</td>`;
+                row.innerHTML = innerHTML;
+                requestList.querySelector('tbody').appendChild(row);
+            });
+        }
+
+        window.handleRequest = handleRequest;
+
+        async function handleRequest(id, status) {
+            const response = await fetch(`/api/requests/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({status})
+            });
+
+            if (response.ok) {
+                await searchRequests();
+            } else {
+                const errorData = await response.json();
+                alert('Failed to update request: ' + errorData.error);
+            }
         }
     </script>
 </div>

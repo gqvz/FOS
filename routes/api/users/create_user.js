@@ -22,7 +22,7 @@ router.post("/",
         }
 
         // check if user already exists
-        const [result] = await connection.query("SELECT * FROM Users WHERE email = ? LIMIT 1;", [email]);
+        const [result] = await connection.query("SELECT * FROM Users WHERE (email = ? OR  name = ?) LIMIT 1;", [email, name]);
         if (result.length > 0) {
             return res.status(400).json({error: "User already exists"});
         }

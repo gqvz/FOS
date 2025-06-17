@@ -29,12 +29,70 @@
             </ul>
             <div class="d-flex">
                 <span class="text-center align-content-center me-3">Hi, <code><%- email %></code></span>
+                <button class="btn btn-outline-secondary me-3" onclick="changeRoles()">Change roles</button>
                 <button class="btn btn-outline-danger" type="button" onclick="signout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="role-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Request Role change</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select class="form-select mt-2" id="request-role" aria-label="Role select">
+                        <option value="customer">Customer</option>
+                        <option value="chef">Chef</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Request Role Change</button>
+                </div>
             </div>
         </div>
     </div>
 </nav>
 <script>
+    async function changeRoles() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("role-modal")) || new bootstrap.Modal(document.getElementById('role-modal'));
+        const roleSelect = document.getElementById('request-role');
+        const requestButton = document.querySelector('#role-modal .btn-primary');
+
+        requestButton.onclick = async () => {
+            const selectedRole = roleSelect.value;
+            requestButton.disabled = true;
+            try {
+                const response = await fetch('/api/requests/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({role: selectedRole})
+                });
+
+                if (response.ok) {
+                    alert('Role change request sent successfully!');
+                    modal.hide();
+                } else {
+                    const errorData = await response.json();
+                    console.error('Role change request failed:', errorData);
+                    alert('Role change request failed: ' + errorData.error);
+                    requestButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error sending role change request:', error);
+                alert('An error occurred while sending the role change request.');
+                modal.hide();
+            }
+        };
+        requestButton.disabled = false;
+        modal.show();
+    }
     async function signout() {
         const response = await fetch('/api/auth/token/', {
             method: 'DELETE',

@@ -23,6 +23,10 @@ router.patch("/:id", isAuthorized(["customer", "chef", "admin"]),
             return res.status(403).json({error: "You can only edit your own user profile"});
         }
 
+        if (password && userId !== res.locals.userId) {
+            return res.status(403).json({error: "You can only change your own password"});
+        }
+
         if (!name && !email && !role && !password) {
             return res.status(400).json({error: "At least one field to update is required"});
         }
@@ -60,6 +64,11 @@ router.patch("/:id", isAuthorized(["customer", "chef", "admin"]),
         }
 
         try {
+            // get user with same username
+            const [existingUsers] = await connection.query("SELECT * FROM Users WHERE (email = ? OR name = ?) AND id != ? LIMIT 1;", [email, name, userId]);
+            if (existingUsers.length > 0) {
+                return res.status(400).json({error: "User with this email or name already exists"});
+            }
             await connection.query("UPDATE Users SET name = ?, email = ?, role = ?, password_hash = ? WHERE id = ?;", [name, email, role, passwordHash, userId]);
             res.status(200).json({message: "User updated successfully"});
         } catch (error) {

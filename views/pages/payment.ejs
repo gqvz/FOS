@@ -80,7 +80,8 @@
                         body: JSON.stringify({status: 'completed'})
                     });
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        const errorData = await response.json();
+                        throw new Error(errorData.error);
                     }
                     window.location.reload();
                 } catch (error) {
@@ -117,7 +118,8 @@
                 }
             });
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorData = await response.json();
+                throw new Error(errorData.error);
             }
             const data = await response.json();
             renderPayment(data);

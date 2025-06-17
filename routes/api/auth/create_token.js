@@ -7,14 +7,14 @@ const router = express.Router();
 
 router.post("/token",
     async (req, res) => {
-        const {email, password} = req.body;
+        const {name, password} = req.body;
         const userAgent = req.headers['user-agent'] || 'unknown';
 
-        if (!email || !password) {
-            return res.status(400).json({error: "Email and password are required"});
+        if (!name || !password) {
+            return res.status(400).json({error: "Name and password are required"});
         }
 
-        const [result] = await connection.query("SELECT * FROM Users WHERE email = ? LIMIT 1;", [email]);
+        const [result] = await connection.query("SELECT * FROM Users WHERE name = ? LIMIT 1;", [name]);
         if (result.length === 0) {
             return res.status(401).json({error: "Invalid email or password"});
         }
@@ -22,7 +22,7 @@ router.post("/token",
         const user = result[0];
         const isPasswordValid = bcrypt.compareSync(password, user.password_hash);
         if (!isPasswordValid) {
-            return res.status(401).json({error: "Invalid email or password"});
+            return res.status(401).json({error: "Invalid name or password"});
         }
 
         // Generate refresh token
@@ -43,6 +43,7 @@ router.post("/token",
                     role: user.role,
                     sessionId: result.insertId,
                     email: user.email,
+                    name: user.name,
                 },
                 process.env.JWT_SECRET,
                 {
