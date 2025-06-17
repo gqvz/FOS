@@ -32,7 +32,7 @@ router.patch('/:id', isAuthorized(['admin']), async (req, res) => {
 
         await connection.beginTransaction();
 
-        await connection.query("UPDATE Requests SET status = ?, granted_by = ? WHERE id = ?;", [status, res.locals.userId, requestId]);
+        await connection.query("UPDATE Requests SET status = ?, granted_by = ?, user_status = 'unseen' WHERE id = ?;", [status, res.locals.userId, requestId]);
 
         if (status === 'granted') {
             await connection.query("UPDATE Users SET role = ? WHERE id = ?;", [request.role, request.user_id]);

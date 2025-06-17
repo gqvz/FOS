@@ -27,7 +27,7 @@ router.post("/", isAuthorized(['customer', 'chef', 'admin']), async (req, res) =
         }
 
         const [results] = await connection.query(
-            "INSERT INTO Requests (user_id, role, status) VALUES (?, ?, 'pending');",
+            "INSERT INTO Requests (user_id, role, status, user_status) VALUES (?, ?, 'pending', 'seen');",
             [res.locals.userId, role]
         );
 

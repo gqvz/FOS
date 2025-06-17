@@ -1,5 +1,8 @@
 import mysql from 'mysql2/promise';
 import fs from 'fs';
+import {config} from 'dotenv';
+
+config({path: 'config/.env'});
 const {DB_HOST, DB_USER, DB_PASSWORD, DB_NAME} = process.env;
 
 let connection;
@@ -17,6 +20,7 @@ while (attempts < 3) {
         break;
     } catch (error) {
         attempts++;
+        console.log(error)
         console.error(`Database connection failed. Attempt ${attempts} of 3.`);
         if (attempts < 3) {
             await new Promise(resolve => setTimeout(resolve, 10000)); // wait for 1 second
